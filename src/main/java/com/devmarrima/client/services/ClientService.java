@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.devmarrima.client.dto.ClientDTO;
 import com.devmarrima.client.entities.Client;
 import com.devmarrima.client.repositories.ClientRepository;
+import com.devmarrima.client.services.exceptions.ResourceNotFoundException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ClientService {
@@ -18,7 +21,7 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id) {
-        Client entity = repository.findById(id).get();
+        Client entity = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Recurso não encontrado!"));
         return new ClientDTO(entity);
     }
 
@@ -38,15 +41,29 @@ public class ClientService {
 
     @Transactional
     public ClientDTO update(Long id, ClientDTO dto) {
-        Client entity = repository.getReferenceById(id);
-        copyDtoToEntity(dto, entity);
-        entity = repository.save(entity);
-        return new ClientDTO(entity);
+        try{
+            Client entity = repository.getReferenceById(id);
+            copyDtoToEntity(dto, entity);
+            entity = repository.save(entity);
+            return new ClientDTO(entity);
+        }
+        catch(EntityNotFoundException e){
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
+
     }
 
     @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não encontrado!");
+        }
+            
+        else {
+            repository.deleteById(id);
+        }
+
     }
 
     private void copyDtoToEntity(ClientDTO dto, Client entity) {
