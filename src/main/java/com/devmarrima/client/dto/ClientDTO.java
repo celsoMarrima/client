@@ -4,12 +4,22 @@ import java.time.LocalDate;
 
 import com.devmarrima.client.entities.Client;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
+
 public class ClientDTO {
     private Long id;
+    @Size(min = 3, max = 50, message = "O campo tem que ter de três a cem caracteres" )
+    @NotBlank(message = " Não pode ser vazio.")
     private String name;
+
     private String cpf;
     private Double income;
+
+    @PastOrPresent(message = "A data de nascimento deve estar no passado ou ser a data atual.")
     private LocalDate birthDate;
+    
     private Integer children;
 
     public ClientDTO() {
@@ -40,7 +50,7 @@ public class ClientDTO {
     public String getName() {
         return name;
     }
-
+    
     public String getCpf() {
         return cpf;
     }
